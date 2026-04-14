@@ -45,16 +45,20 @@ var FORMSPREE_ID='mojyqrjb';
 var QS=[
   {cat:'Revenue and Pricing',q:'How often do you review your service fees and pricing?',opts:[{t:'Never or rarely',s:2},{t:'Once a year',s:5},{t:'Every 6 months',s:8},{t:'Quarterly or more often',s:10}]},
   {cat:'Revenue and Pricing',q:'Do you track revenue per client visit or appointment?',opts:[{t:'No system in place',s:2},{t:'I have a rough idea',s:5},{t:'Yes, tracked manually',s:8},{t:'Yes, automated with software',s:10}]},
-  {cat:'Revenue and Pricing',q:'Do you offer wellness or preventive care plans to clients?',opts:[{t:'No',s:2},{t:'Considering it',s:5},{t:'Yes, offered to some clients',s:8},{t:'Yes, actively promoted',s:10}]},
+  {cat:'Revenue and Pricing',q:'Is your practice seeing continued growth, or signs of decline?',opts:[{t:'Clear decline in revenue or clients',s:2},{t:'Revenue is flat or stagnant',s:5},{t:'Modest growth year over year',s:8},{t:'Consistent strong growth',s:10}]},
+  {cat:'Revenue and Pricing',q:'How prepared are you to adapt your services to shifts in market demand?',opts:[{t:'We have not thought about it',s:2},{t:'Aware but no plan in place',s:5},{t:'Some flexibility built in',s:8},{t:'We actively monitor and adjust our offerings',s:10}]},
   {cat:'Tax and Compliance',q:'How is your veterinary practice structured for tax purposes?',opts:[{t:'Sole proprietorship',s:2},{t:'Basic incorporation',s:5},{t:'Incorporated with some planning',s:8},{t:'Fully optimized corporate structure',s:10}]},
   {cat:'Tax and Compliance',q:'Does your accountant specialize in veterinary practices?',opts:[{t:'I do not have an accountant',s:2},{t:'General accountant',s:5},{t:'Some healthcare experience',s:8},{t:'Veterinary or medical specialist',s:10}]},
-  {cat:'Tax and Compliance',q:'Are you claiming all eligible HST/GST input tax credits?',opts:[{t:'Not sure',s:2},{t:'Claiming some',s:5},{t:'Claiming most',s:8},{t:'Fully optimized and reviewed',s:10}]},
+  {cat:'Tax and Compliance',q:'Are you claiming all eligible HST and GST input tax credits?',opts:[{t:'Not sure',s:2},{t:'Claiming some',s:5},{t:'Claiming most',s:8},{t:'Fully optimized and reviewed',s:10}]},
   {cat:'Cash Flow and Expenses',q:'How do you currently manage your practice cash flow?',opts:[{t:'No formal system',s:2},{t:'Spreadsheets',s:5},{t:'Accounting software',s:8},{t:'Real-time financial dashboard',s:10}]},
   {cat:'Cash Flow and Expenses',q:'How frequently do you review your practice expense categories?',opts:[{t:'Rarely or never',s:2},{t:'A few times a year',s:5},{t:'Monthly',s:8},{t:'Weekly with benchmarking',s:10}]},
+  {cat:'Cash Flow and Expenses',q:'Are you financially optimized for the slow months in your practice?',opts:[{t:'Slow months cause real cash stress',s:2},{t:'We manage but it is tight',s:5},{t:'We have some reserves set aside',s:8},{t:'We plan and budget for slow seasons in advance',s:10}]},
   {cat:'Growth and Planning',q:'Do you have a written financial plan for your practice?',opts:[{t:'No plan',s:2},{t:'Informal - in my head',s:5},{t:'Written but rarely reviewed',s:8},{t:'Written and reviewed regularly',s:10}]},
-  {cat:'Growth and Planning',q:'How well do you understand your payroll as a percentage of revenue?',opts:[{t:'No idea',s:2},{t:'Rough estimate',s:5},{t:'I know the number',s:8},{t:'Know it and benchmark against industry',s:10}]}
+  {cat:'Growth and Planning',q:'How well do you understand your payroll as a percentage of revenue?',opts:[{t:'No idea',s:2},{t:'Rough estimate',s:5},{t:'I know the number',s:8},{t:'Know it and benchmark against industry',s:10}]},
+  {cat:'Growth and Planning',q:'Do you offer wellness or preventive care plans to grow recurring revenue?',opts:[{t:'No',s:2},{t:'Considering it',s:5},{t:'Yes, offered to some clients',s:8},{t:'Yes, actively promoted and tracked',s:10}]},
+  {cat:'Growth and Planning',q:'Do you have an exit strategy or succession plan for your practice?',opts:[{t:'Never thought about it',s:2},{t:'Thinking about it but no plan',s:5},{t:'A general idea of the timeline',s:8},{t:'A documented plan with financial targets',s:10}]}
 ];
-var screen='welcome',curQ=0,answers=[null,null,null,null,null,null,null,null,null,null];
+var screen='welcome',curQ=0,answers=[null,null,null,null,null,null,null,null,null,null,null,null,null,null];
 var score=0,ai=null,selTime='';
 var app=document.getElementById('app');
 
@@ -97,7 +101,7 @@ function showWelcome(){
 }
 
 function showDiag(){
-  var q=QS[curQ],prog=Math.round((curQ/10)*100),opts='';
+  var q=QS[curQ],prog=Math.round((curQ/14)*100),opts='';
   for(var i=0;i<q.opts.length;i++){
     var sel=answers[curQ]===i;
     opts+='<button class="opt-btn" onclick="pick('+i+')" style="display:block;width:100%;background:'+(sel?'#0f4a2e':'#f7f5f0')+';color:'+(sel?'#fff':'#1a1a1a')+';border:0.5px solid '+(sel?'#0f4a2e':'#d9d0be')+';border-radius:8px;padding:13px 18px;text-align:left;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:14px;margin-bottom:9px;">'+q.opts[i].t+'</button>';
@@ -108,7 +112,7 @@ function showDiag(){
   app.innerHTML=hdr()+'<div class="fade">'
   +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">'
   +'<p class="sans" style="font-size:10px;color:#a07c30;letter-spacing:2.5px;text-transform:uppercase;margin:0;">'+q.cat+'</p>'
-  +'<p class="sans" style="font-size:11px;color:#9aab9f;margin:0;">Question '+(curQ+1)+' of 10</p></div>'
+  +'<p class="sans" style="font-size:11px;color:#9aab9f;margin:0;">Question '+(curQ+1)+' of 14</p></div>'
   +'<div style="background:#dce8e0;border-radius:4px;height:5px;margin-bottom:26px;"><div style="background:#0f4a2e;height:5px;border-radius:4px;width:'+prog+'%;transition:width 0.4s;"></div></div>'
   +'<div class="card"><p style="font-size:20px;color:#1a1a1a;line-height:1.35;margin:0 0 22px;font-weight:400;">'+q.q+'</p>'+opts
   +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;">'+back+nxt+'</div></div></div>';
@@ -116,11 +120,12 @@ function showDiag(){
 
 function pick(i){answers[curQ]=i;showDiag();}
 function prevQ(){if(curQ>0){curQ--;render();}}
-function nextQ(){if(answers[curQ]===null)return;if(curQ<9){curQ++;render();}else{calcResults();}}
+function nextQ(){if(answers[curQ]===null)return;if(curQ<13){curQ++;render();}else{calcResults();}}
 
 function calcResults(){
-  score=0;
-  for(var i=0;i<answers.length;i++){if(answers[i]!==null)score+=QS[i].opts[answers[i]].s;}
+  var raw=0;
+  for(var i=0;i<answers.length;i++){if(answers[i]!==null)raw+=QS[i].opts[answers[i]].s;}
+  score=Math.round((raw/140)*100);
   screen='results';
   render();
   setTimeout(function(){getAI();},100);
@@ -131,7 +136,7 @@ function scoreLabel(s){return s<45?'Critical Risk':s<60?'Needs Attention':s<75?'
 
 function showResults(){
   var col=scoreColor(score),lbl=scoreLabel(score);
-  var cats=[{n:'Revenue and Pricing',qs:[0,1,2],max:30},{n:'Tax and Compliance',qs:[3,4,5],max:30},{n:'Cash Flow and Expenses',qs:[6,7],max:20},{n:'Growth and Planning',qs:[8,9],max:20}];
+  var cats=[{n:'Revenue and Pricing',qs:[0,1,2,3],max:40},{n:'Tax and Compliance',qs:[4,5,6],max:30},{n:'Cash Flow and Expenses',qs:[7,8,9],max:30},{n:'Growth and Planning',qs:[10,11,12,13],max:40}];
   var bars='';
   for(var c=0;c<cats.length;c++){
     var cat=cats[c],cs=0;
@@ -156,9 +161,10 @@ function showResults(){
 }
 
 function getAI(){
-  var revScore=0;for(var i=0;i<3;i++){if(answers[i]!==null)revScore+=QS[i].opts[answers[i]].s;}
-  var taxScore=0;for(var i=3;i<6;i++){if(answers[i]!==null)taxScore+=QS[i].opts[answers[i]].s;}
-  var cfScore=0;for(var i=6;i<8;i++){if(answers[i]!==null)cfScore+=QS[i].opts[answers[i]].s;}
+  var revScore=0;for(var i=0;i<4;i++){if(answers[i]!==null)revScore+=QS[i].opts[answers[i]].s;}
+  var taxScore=0;for(var i=4;i<7;i++){if(answers[i]!==null)taxScore+=QS[i].opts[answers[i]].s;}
+  var cfScore=0;for(var i=7;i<10;i++){if(answers[i]!==null)cfScore+=QS[i].opts[answers[i]].s;}
+  var grScore=0;for(var i=10;i<14;i++){if(answers[i]!==null)grScore+=QS[i].opts[answers[i]].s;}
   var headline,opp,risk,qw;
 
   if(score<45)headline='Significant financial gaps are costing your practice right now';
@@ -167,7 +173,9 @@ function getAI(){
   else if(score<88)headline='Strong practice with a few optimizations that could add real dollars';
   else headline='Well-run practice - now focus on protecting and growing wealth';
 
-  if(taxScore<=revScore&&taxScore<=cfScore){
+  if(grScore!==undefined&&grScore<20&&grScore<=taxScore&&grScore<=revScore&&grScore<=cfScore){
+    opp='Your growth and exit planning represents your biggest long-term financial opportunity. Practices with documented succession or exit strategies sell for 20 to 40 percent more than those without. Starting this planning now, even years before you intend to exit, dramatically increases your practice value and gives you far more options.';
+  }else if(taxScore<=revScore&&taxScore<=cfScore){
     opp='Your tax structure is your biggest opportunity. Most incorporated veterinary practices in Canada leave tens of thousands of dollars on the table annually through suboptimal corporate structure and unclaimed HST and GST input credits. A veterinary-specific tax review typically pays for itself many times over.';
   }else if(revScore<=cfScore){
     opp='Your revenue per visit has significant room to grow. Veterinary practices that conduct annual fee reviews and introduce wellness plans typically see 15 to 25 percent revenue increases without adding a single new client. Systematic pricing alone could meaningfully change your bottom line.';
@@ -185,12 +193,18 @@ function getAI(){
     risk='Without a written financial plan, growth decisions such as hiring, expanding, and acquiring equipment are made reactively rather than strategically. This often results in taking on costs or debt at the wrong time, squeezing cash flow when the practice needs flexibility most.';
   }
 
-  if(answers[4]!==null&&QS[4].opts[answers[4]].s<8){
+  if(answers[5]!==null&&QS[5].opts[answers[5]].s<8){
     qw='This week, ask your current accountant one question: how many veterinary practices do you work with? If the answer is fewer than five, it is worth having a second-opinion conversation with a veterinary accounting specialist. It costs nothing and could save you thousands.';
-  }else if(answers[6]!==null&&QS[6].opts[answers[6]].s<8){
+  }else if(answers[7]!==null&&QS[7].opts[answers[7]].s<8){
     qw='Set up a free Wave or QuickBooks account this week and connect your practice bank account. Even basic categorization of the last 90 days of transactions will immediately show you where your largest controllable expenses are hiding.';
   }else{
+    if(answers[13]!==null&&QS[13].opts[answers[13]].s<8){
+    qw='This week, write down three numbers: the year you plan to exit your practice, the minimum sale price you would accept, and your current estimated practice value. If you cannot answer all three, an exit planning conversation with a specialist should be your next step.';
+  }else if(answers[2]!==null&&QS[2].opts[answers[2]].s<8){
+    qw='Review your last 24 months of revenue. If you see a declining trend, identify the single biggest change in your client base or service mix and bring that data to a financial review. Understanding the cause is the first step to reversing it.';
+  }else{
     qw='Pull your last Notice of Assessment from CRA and compare your effective tax rate to the small business corporate rate of 9 percent. If the gap is significant, you are almost certainly overpaying. Bring this number to your next meeting with us.';
+  }
   }
 
   ai={headline:headline,opportunity:opp,risk:risk,quickwin:qw};
@@ -213,7 +227,7 @@ function showBooking(){
   var provs=['Alberta','British Columbia','Manitoba','New Brunswick','Newfoundland and Labrador','Nova Scotia','Ontario','PEI','Quebec','Saskatchewan'];
   var provOpts='<option value="">Select province...</option>';
   for(var p=0;p<provs.length;p++)provOpts+='<option>'+provs[p]+'</option>';
-  var times=['Morning (9-12)','Afternoon (12-4)','Evening (4-6)'];
+  var times=['Afternoon (12-4)','Evening (6-9)'];
   var timeBtns='';
   for(var t=0;t<times.length;t++){
     timeBtns+='<button type="button" onclick="pickTime(this,\''+times[t]+'\')" data-t="'+times[t]+'" style="background:#f7f5f0;border:0.5px solid #d9d0be;border-radius:8px;padding:10px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:12px;color:#1a1a1a;">'+times[t]+'</button>';
@@ -235,7 +249,7 @@ function showBooking(){
   +'<div style="margin-bottom:12px;"><label class="sans" style="font-size:11.5px;color:#6b7e72;display:block;margin-bottom:5px;">Province</label>'
   +'<select name="province" style="width:100%;border:0.5px solid #d9d0be;border-radius:8px;padding:11px 14px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;">'+provOpts+'</select></div>'
   +'<div style="margin-bottom:12px;"><label class="sans" style="font-size:11.5px;color:#6b7e72;display:block;margin-bottom:7px;">Preferred meeting time</label>'
-  +'<div class="grid3">'+timeBtns+'</div></div>'
+  +'<div class="grid2" style="margin-bottom:0;">'+timeBtns+'</div></div>'
   +'<div style="margin-bottom:22px;"><label class="sans" style="font-size:11.5px;color:#6b7e72;display:block;margin-bottom:5px;">Anything specific to discuss? (optional)</label>'
   +'<textarea name="message" placeholder="e.g. corporate structure, HST, buying a second location..." style="width:100%;border:0.5px solid #d9d0be;border-radius:8px;padding:12px;font-family:Helvetica Neue,Helvetica,Arial,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;min-height:74px;resize:vertical;"></textarea></div>'
   +'<div id="form-err" class="form-error" style="display:none;"></div>'
@@ -302,7 +316,7 @@ function showConfirm(){
   +'</div></div>';
 }
 
-function go(s){screen=s;if(s==='diag'){curQ=0;answers=[null,null,null,null,null,null,null,null,null,null];ai=null;}render();}
+function go(s){screen=s;if(s==='diag'){curQ=0;answers=[null,null,null,null,null,null,null,null,null,null,null,null,null,null];ai=null;}render();}
 render();
 </script>
 </body>
