@@ -1,0 +1,2 @@
+# PerspicacityPartners
+Response File
