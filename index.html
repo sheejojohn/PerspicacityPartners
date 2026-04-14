@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perspicacity Partners — Practice Profitability Diagnostic</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Georgia,'Times New Roman',serif;background:#f7f5f0;min-height:100vh;padding:20px 16px 60px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.fade{animation:fadeIn 0.35s ease forwards;}
+input,select,textarea{outline:none;transition:border-color 0.15s;box-sizing:border-box;}
+input:focus,select:focus,textarea:focus{border-color:#0f4a2e!important;box-shadow:0 0 0 3px rgba(15,74,46,0.08);}
+.opt-btn:hover{border-color:#0f4a2e!important;background:#f0f6f2!important;}
+button{cursor:pointer;}
+.card{background:#fff;border-radius:14px;border:0.5px solid #d9d0be;padding:34px 38px;margin-bottom:14px;}
+.card-cream{background:#f7f5f0;border-radius:14px;border:0.5px solid #d9d0be;padding:34px 38px;margin-bottom:14px;}
+.label{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:9.5px;letter-spacing:3px;color:#a07c30;text-transform:uppercase;margin:0 0 14px;display:block;}
+.sans{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;}
+.gbtn{background:#0f4a2e;color:#fff;border:none;padding:14px 28px;border-radius:8px;font-family:Georgia,serif;font-size:15px;width:100%;}
+.gbtn:hover{background:#0a3520;}
+.gbtn:disabled{background:#c5d5ca;cursor:not-allowed;}
+.goldbtn{background:#a07c30;color:#fff;border:none;padding:13px 28px;border-radius:8px;font-family:Georgia,serif;font-size:15px;width:100%;}
+.goldbtn:hover{background:#8a6828;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.field-error{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;color:#c0392b;margin-top:4px;display:block;}
+.form-error{background:#fdf0f0;border:0.5px solid #f5c6c6;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;color:#c0392b;}
+@media(max-width:600px){
+  .grid2,.grid3{grid-template-columns:1fr!important;}
+  .score-wrap{flex-direction:column!important;align-items:center!important;}
+  .card,.card-cream{padding:24px 20px;}
+}
+</style>
+</head>
+<body>
+<div id="app" style="max-width:700px;margin:0 auto;"></div>
+
+<script>
+  window.formspree = window.formspree || function(){(formspree.q=formspree.q||[]).push(arguments);};
+</script>
+<script src="https://unpkg.com/@formspree/ajax@1" defer></script>
+
+<script>
+var FORMSPREE_ID  = 'mojyqrjb';
+/* ============================================================ */
+
+var QS = [
+  {cat:'Revenue & Pricing',    q:'How often do you review your service fees and pricing?',          opts:[{t:'Never or rarely',s:2},{t:'Once a year',s:5},{t:'Every 6 months',s:8},{t:'Quarterly or more often',s:10}]},
+  {cat:'Revenue & Pricing',    q:'Do you track revenue per client visit or appointment?',           opts:[{t:'No system in place',s:2},{t:'I have a rough idea',s:5},{t:'Yes, tracked manually',s:8},{t:'Yes, automated with software',s:10}]},
+  {cat:'Revenue & Pricing',    q:'Do you offer wellness or preventive care plans to clients?',      opts:[{t:'No',s:2},{t:'Considering it',s:5},{t:'Yes, offered to some clients',s:8},{t:'Yes, actively promoted',s:10}]},
+  {cat:'Tax & Compliance',     q:'How is your veterinary practice structured for tax purposes?',    opts:[{t:'Sole proprietorship',s:2},{t:'Basic incorporation',s:5},{t:'Incorporated with some planning',s:8},{t:'Fully optimized corporate structure',s:10}]},
+  {cat:'Tax & Compliance',     q:'Does your accountant specialize in veterinary practices?',        opts:[{t:'I don\'t have an accountant',s:2},{t:'General accountant',s:5},{t:'Some healthcare experience',s:8},{t:'Veterinary / medical specialist',s:10}]},
+  {cat:'Tax & Compliance',     q:'Are you claiming all eligible HST/GST input tax credits?',       opts:[{t:'Not sure',s:2},{t:'Claiming some',s:5},{t:'Claiming most',s:8},{t:'Fully optimized and reviewed',s:10}]},
+  {cat:'Cash Flow & Expenses', q:'How do you currently manage your practice cash flow?',           opts:[{t:'No formal system',s:2},{t:'Spreadsheets',s:5},{t:'Accounting software',s:8},{t:'Real-time financial dashboard',s:10}]},
+  {cat:'Cash Flow & Expenses', q:'How frequently do you review your practice expense categories?', opts:[{t:'Rarely or never',s:2},{t:'A few times a year',s:5},{t:'Monthly',s:8},{t:'Weekly with benchmarking',s:10}]},
+  {cat:'Growth & Planning',    q:'Do you have a written financial plan for your practice?',        opts:[{t:'No plan',s:2},{t:'Informal / in my head',s:5},{t:'Written but rarely reviewed',s:8},{t:'Written and reviewed regularly',s:10}]},
+  {cat:'Growth & Planning',    q:'How well do you understand your payroll as a % of revenue?',     opts:[{t:'No idea',s:2},{t:'Rough estimate',s:5},{t:'I know the number',s:8},{t:'Know it and benchmark against industry',s:10}]}
+];
+
+var screen='welcome', curQ=0, answers=[null,null,null,null,null,null,null,null,null,null];
+var score=0, ai=null, selTime='';
+var app=document.getElementById('app');
+
+function hdr(){
+  return '<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:22px;border-bottom:0.5px solid #d9d0be;margin-bottom:8px;">'
+    +'<div>'
+    +'<p class="sans" style="font-size:18px;color:#0f4a2e;font-weight:700;margin:0;">Perspicacity Partners</p>'
+    +'<p class="sans" style="font-size:9.5px;color:#a07c30;letter-spacing:2.5px;text-transform:uppercase;margin:0;">Accounting · Tax · Advisory</p>'
+    +'</div>'
+    +'<p class="sans" style="font-size:10px;color:#9aab9f;letter-spacing:1.5px;text-transform:uppercase;margin:0;">Canadian Veterinary Practices</p>'
+    +'</div>';
+}
+
+function render(){
+  window.scrollTo(0,0);
+  if(screen==='welcome')      showWelcome();
+  else if(screen==='diag')    showDiag();
+  else if(screen==='results') showResults();
+  else if(screen==='booking') showBooking();
+  else if(screen==='confirm') showConfirm();
+}
+
+/* ── WELCOME ── */
+function statBox(v,l){
+  return '<div style="background:#f7f5f0;border-radius:8px;padding:14px;text-align:center;">'
+    +'<p style="font-size:20px;color:#0f4a2e;margin:0 0 3px;">'+v+'</p>'
+    +'<p class="sans" style="font-size:11px;color:#9aab9f;margin:0;">'+l+'</p>'
+    +'</div>';
+}
+
+function showWelcome(){
+  var stats='<div class="grid3" style="margin-bottom:26px;">'
+    +statBox('10','Questions')+statBox('~3 min','To complete')+statBox('Free','No obligation')
+    +'</div>';
+  app.innerHTML=hdr()
+    +'<div class="card fade">'
+    +'<span class="label">Free Diagnostic Tool</span>'
+    +'<h1 style="font-size:30px;color:#0f4a2e;margin:0 0 6px;font-weight:400;line-height:1.2;">Is your practice as profitable<br>as it could be?</h1>'
+    +'<p class="sans" style="font-size:14px;color:#6b7e72;line-height:1.65;margin:12px 0 24px;">Answer 10 questions and receive your <strong style="color:#1a1a1a;">Practice Profitability Score</strong> — with AI-powered insights on your biggest financial opportunities and risks.</p>'
+    +stats
+    +'<button class="gbtn" onclick="go(\'diag\')">Start the diagnostic &#8594;</button>'
+    +'<p class="sans" style="font-size:11px;color:#b0bcb5;text-align:center;margin:12px 0 0;">Your answers are confidential and never shared.</p>'
+    +'</div>'
+    +'<div class="card-cream fade">'
+    +'<span class="label">Prefer to book directly?</span>'
+    +'<p style="font-size:19px;color:#0f4a2e;margin:0 0 6px;font-weight:400;">Book a free 30-minute financial review</p>'
+    +'<p class="sans" style="font-size:13px;color:#6b7e72;margin:0 0 18px;line-height:1.6;">Speak with a veterinary accounting specialist. Walk away knowing exactly where your money stands.</p>'
+    +'<button class="goldbtn" onclick="go(\'booking\')">Book a meeting &#8594;</button>'
+    +'</div>';
+}
+
+/* ── DIAGNOSTIC ── */
+function showDiag(){
+  var q=QS[curQ], prog=Math.round((curQ/10)*100), opts='';
+  for(var i=0;i<q.opts.length;i++){
+    var sel=answers[curQ]===i;
+    opts+='<button class="opt-btn" onclick="pick('+i+')" style="'
+      +'display:block;width:100%;background:'+(sel?'#0f4a2e':'#f7f5f0')+';'
+      +'color:'+(sel?'#fff':'#1a1a1a')+';'
+      +'border:0.5px solid '+(sel?'#0f4a2e':'#d9d0be')+';'
+      +'border-radius:8px;padding:13px 18px;text-align:left;'
+      +'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:14px;margin-bottom:9px;">'
+      +q.opts[i].t+'</button>';
+  }
+  var backBtn=curQ>0
+    ?'<button onclick="prevQ()" style="background:none;border:0.5px solid #d9d0be;color:#6b7e72;padding:10px 20px;border-radius:8px;font-family:\'Helvetica Neue\',sans-serif;font-size:12px;">&#8592; Back</button>'
+    :'<span></span>';
+  var canNext=answers[curQ]!==null;
+  var nextBtn='<button onclick="nextQ()" style="background:'+(canNext?'#0f4a2e':'#c5d5ca')+';color:#fff;border:none;'
+    +'padding:11px 26px;border-radius:8px;font-family:Georgia,serif;font-size:14px;cursor:'+(canNext?'pointer':'not-allowed')+';">'
+    +(curQ===9?'See my results &#8594;':'Next &#8594;')+'</button>';
+  app.innerHTML=hdr()
+    +'<div class="fade">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">'
+    +'<p class="sans" style="font-size:10px;color:#a07c30;letter-spacing:2.5px;text-transform:uppercase;margin:0;">'+q.cat+'</p>'
+    +'<p class="sans" style="font-size:11px;color:#9aab9f;margin:0;">Question '+(curQ+1)+' of 10</p>'
+    +'</div>'
+    +'<div style="background:#dce8e0;border-radius:4px;height:5px;margin-bottom:26px;">'
+    +'<div style="background:#0f4a2e;height:5px;border-radius:4px;width:'+prog+'%;transition:width 0.4s;"></div>'
+    +'</div>'
+    +'<div class="card">'+opts
+    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;">'
+    +backBtn+nextBtn+'</div></div></div>';
+}
+
+function pick(i){answers[curQ]=i;showDiag();}
+function prevQ(){if(curQ>0){curQ--;render();}}
+function nextQ(){
+  if(answers[curQ]===null)return;
+  if(curQ<9){curQ++;render();}else{calcResults();}
+}
+
+/* ── RESULTS ── */
+function calcResults(){
+  score=0;
+  for(var i=0;i<answers.length;i++){if(answers[i]!==null)score+=QS[i].opts[answers[i]].s;}
+  screen='results';render();getAI();
+}
+function scoreColor(s){return s<45?'#c0392b':s<60?'#d4720a':s<75?'#a07c30':s<88?'#2e7d32':'#0f4a2e';}
+function scoreLabel(s){return s<45?'Critical Risk':s<60?'Needs Attention':s<75?'On Track':s<88?'Strong':'Optimized';}
+
+function showResults(){
+  var col=scoreColor(score), lbl=scoreLabel(score);
+  var cats=[
+    {n:'Revenue & Pricing',   qs:[0,1,2],max:30},
+    {n:'Tax & Compliance',    qs:[3,4,5],max:30},
+    {n:'Cash Flow & Expenses',qs:[6,7],  max:20},
+    {n:'Growth & Planning',   qs:[8,9],  max:20}
+  ];
+  var bars='';
+  for(var c=0;c<cats.length;c++){
+    var cat=cats[c],cs=0;
+    for(var qi=0;qi<cat.qs.length;qi++){var a=answers[cat.qs[qi]];if(a!==null)cs+=QS[cat.qs[qi]].opts[a].s;}
+    var pct=Math.round((cs/cat.max)*100);
+    var bc=pct<50?'#c0392b':pct<70?'#a07c30':'#0f4a2e';
+    bars+='<div style="margin-bottom:11px;">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px;">'
+      +'<p class="sans" style="font-size:11.5px;color:#6b7e72;margin:0;">'+cat.n+'</p>'
+      +'<p class="sans" style="font-size:11.5px;color:#1a1a1a;font-weight:500;margin:0;">'+pct+'%</p>'
+      +'</div>'
+      +'<div style="background:#dce8e0;border-radius:3px;height:6px;">'
+      +'<div style="background:'+bc+';height:6px;border-radius:3px;width:'+pct+'%;"></div>'
+      +'</div></div>';
+  }
+  app.innerHTML=hdr()
+    +'<div class="card fade">'
+    +'<p class="sans label">Your Practice Profitability Score</p>'
+    +'<div class="score-wrap" style="display:flex;align-items:center;gap:28px;">'
+    +'<div style="flex-shrink:0;text-align:center;">'
+    +'<div style="width:108px;height:108px;border-radius:50%;border:6px solid '+col+';display:flex;align-items:center;justify-content:center;flex-direction:column;">'
+    +'<p style="font-size:38px;font-weight:400;color:'+col+';margin:0;line-height:1;">'+score+'</p>'
+    +'<p class="sans" style="font-size:10px;color:#b0bcb5;margin:0;">/ 100</p>'
+    +'</div>'
+    +'<p class="sans" style="font-size:10px;color:'+col+';font-weight:700;margin:10px 0 0;letter-spacing:1px;text-transform:uppercase;">'+lbl+'</p>'
+    +'</div>'
+    +'<div style="flex:1;min-width:0;">'+bars+'</div>'
+    +'</div></div>'
+    +'<div id="ai-sec">'+aiSpinner()+'</div>'
+    +'<div class="card-cream fade">'
+    +'<p style="font-size:19px;color:#0f4a2e;margin:0 0 7px;font-weight:400;">Ready to close these gaps?</p>'
+    +'<p class="sans" style="font-size:13px;color:#6b7e72;line-height:1.65;margin:0 0 18px;">Book a free 30-minute review with a Perspicacity Partners specialist. We\'ll walk through your score and show exactly where your practice is leaving money on the table.</p>'
+    +'<button class="gbtn" onclick="go(\'booking\')">Book my free review &#8594;</button>'
+    +'</div>';
+}
+
+function aiSpinner(){
+  return '<div class="card fade" style="text-align:center;padding:24px;">'
+    +'<div style="width:32px;height:32px;border:3px solid #dce8e0;border-top-color:#0f4a2e;border-radius:50%;'
+    +'animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div>'
+    +'<p class="sans" style="font-size:13px;color:#9aab9f;">Generating your personalized insights...</p>'
+    +'</div>';
+}
+
+function renderAI(){
+  if(!ai)return aiSpinner();
+  return '<div class="fade" style="margin-bottom:14px;">'
+    +'<div style="background:#0f4a2e;border-radius:10px;padding:20px 24px;margin-bottom:10px;">'
+    +'<p class="sans" style="font-size:9px;letter-spacing:2.5px;color:#a07c30;text-transform:uppercase;margin:0 0 8px;">AI-Powered Analysis</p>'
+    +'<p style="font-size:17px;color:#f7f5f0;margin:0;line-height:1.35;font-style:italic;">&ldquo;'+ai.headline+'&rdquo;</p>'
+    +'</div>'
+    +'<div class="grid3">'
+    +'<div style="background:#e8f0eb;border-radius:8px;padding:16px;">'
+    +'<p class="sans" style="font-size:9px;color:#0f4a2e;letter-spacing:2px;text-transform:uppercase;margin:0 0 7px;font-weight:600;">Top Opportunity</p>'
+    +'<p class="sans" style="font-size:12px;color:#1a1a1a;line-height:1.6;margin:0;">'+ai.opportunity+'</p>'
+    +'</div>'
+    +'<div style="background:#fdf0e8;border-radius:8px;padding:16px;">'
+    +'<p class="sans" style="font-size:9px;color:#a07c30;letter-spacing:2px;text-transform:uppercase;margin:0 0 7px;font-weight:600;">Urgent Risk</p>'
+    +'<p class="sans" style="font-size:12px;color:#1a1a1a;line-height:1.6;margin:0;">'+ai.risk+'</p>'
+    +'</div>'
+    +'<div style="background:#f7f5f0;border-radius:8px;padding:16px;">'
+    +'<p class="sans" style="font-size:9px;color:#6b7e72;letter-spacing:2px;text-transform:uppercase;margin:0 0 7px;font-weight:600;">Quick Win</p>'
+    +'<p class="sans" style="font-size:12px;color:#1a1a1a;line-height:1.6;margin:0;">'+ai.quickwin+'</p>'
+    +'</div>'
+    +'</div></div>';
+}
+
+
+
+/* ── BOOKING ── */
+function showBooking(){
+  var provs=['Alberta','British Columbia','Manitoba','New Brunswick',
+    'Newfoundland & Labrador','Nova Scotia','Ontario','PEI','Quebec','Saskatchewan'];
+  var provOpts='<option value="">Select province...</option>';
+  for(var p=0;p<provs.length;p++)provOpts+='<option>'+provs[p]+'</option>';
+
+  var times=['Morning (9-12)','Afternoon (12-4)','Evening (4-6)'];
+  var timeBtns='';
+  for(var t=0;t<times.length;t++){
+    timeBtns+='<button type="button" onclick="pickTime(this,\''+times[t]+'\')" data-t="'+times[t]+'" '
+      +'style="background:#f7f5f0;border:0.5px solid #d9d0be;border-radius:8px;padding:10px;'
+      +'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:12px;color:#1a1a1a;">'+times[t]+'</button>';
+  }
+
+  var diagSummary='Score: '+score+'/100 ('+scoreLabel(score)+')\n';
+  for(var i=0;i<QS.length;i++){
+    diagSummary+='\n'+QS[i].q+'\n  Answer: '+(answers[i]!==null?QS[i].opts[answers[i]].t:'Not completed');
+  }
+
+  app.innerHTML=hdr()
+    +'<div class="card fade">'
+    +'<span class="label">Free 30-Minute Meeting</span>'
+    +'<h2 style="font-size:26px;color:#0f4a2e;font-weight:400;margin:0 0 7px;">Book your free financial review</h2>'
+    +'<p class="sans" style="font-size:13px;color:#6b7e72;margin:0 0 26px;line-height:1.65;">'
+    +'A veterinary accounting specialist will review your practice finances, identify tax-saving opportunities, and answer your questions — no obligation.</p>'
+    +'<form id="booking-form" novalidate>'
+    +'<input type="hidden" name="_subject" value="New Booking Request — Perspicacity Partners">'
+    +'<input type="hidden" name="profitability_score" value="'+score+'/100 — '+scoreLabel(score)+'">'
+    +'<input type="hidden" id="hidden-time" name="preferred_time" value="">'
+    +'<input type="hidden" id="hidden-diag" name="diagnostic_answers" value="'+diagSummary.replace(/"/g,'&quot;')+'">'
+    +'<div class="grid2">'
+    +fld('Your name','name','text','Dr. Jane Smith',true)
+    +fld('Practice / Clinic name','clinic','text','Sunset Animal Hospital',false)
+    +fld('Email address','email','email','jane@sunsetvet.ca',true)
+    +fld('Phone number','phone','tel','(519) 555-0100',false)
+    +'</div>'
+    +'<div style="margin-bottom:12px;">'
+    +'<label class="sans" style="font-size:11.5px;color:#6b7e72;display:block;margin-bottom:5px;">Province</label>'
+    +'<select name="province" data-fs-field style="width:100%;border:0.5px solid #d9d0be;border-radius:8px;'
+    +'padding:11px 14px;font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;">'
+    +provOpts+'</select>'
+    +'</div>'
+    +'<div style="margin-bottom:12px;">'
+    +'<label class="sans" style="font-size:11.5px;color:#6b7e72;display:block;margin-bottom:7px;">Preferred meeting time</label>'
+    +'<div class="grid3">'+timeBtns+'</div>'
+    +'</div>'
+    +'<div style="margin-bottom:22px;">'
+    +'<label class="sans" style="font-size:11.5px;color:#6b7e72;display:block;margin-bottom:5px;">Anything specific to discuss? (optional)</label>'
+    +'<textarea name="message" data-fs-field placeholder="e.g. corporate structure, HST, buying a second location..." '
+    +'style="width:100%;border:0.5px solid #d9d0be;border-radius:8px;padding:12px;'
+    +'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:13px;color:#1a1a1a;'
+    +'background:#fff;min-height:74px;resize:vertical;"></textarea>'
+    +'</div>'
+    +'<div data-fs-error style="display:none;" class="form-error"></div>'
+    +'<button type="submit" data-fs-submit-btn class="gbtn">Confirm my free review &#8594;</button>'
+    +'<p class="sans" style="font-size:11px;color:#b0bcb5;text-align:center;margin-top:12px;">'
+    +'We\'ll be in touch within one business day to confirm your time.</p>'
+    +'</form>'
+    +'</div>';
+
+  initFormspree();
+}
+
+function fld(label,name,type,ph,required){
+  return '<div>'
+    +'<label class="sans" style="font-size:11.5px;color:#6b7e72;display:block;margin-bottom:5px;">'
+    +label+(required?' <span style="color:#c0392b;">*</span>':'')+'</label>'
+    +'<input type="'+type+'" name="'+name+'" '+(required?'required ':'')+'data-fs-field placeholder="'+ph+'" '
+    +'style="width:100%;border:0.5px solid #d9d0be;border-radius:8px;padding:11px 14px;'
+    +'font-family:\'Helvetica Neue\',Helvetica,Arial,sans-serif;font-size:13px;color:#1a1a1a;background:#fff;">'
+    +'<span class="field-error" data-fs-error="'+name+'"></span>'
+    +'</div>';
+}
+
+function pickTime(el,t){
+  selTime=t;
+  var hi=document.getElementById('hidden-time');
+  if(hi)hi.value=t;
+  var btns=document.querySelectorAll('[data-t]');
+  for(var i=0;i<btns.length;i++){
+    btns[i].style.background='#f7f5f0';
+    btns[i].style.color='#1a1a1a';
+    btns[i].style.border='0.5px solid #d9d0be';
+  }
+  el.style.background='#0f4a2e';
+  el.style.color='#fff';
+  el.style.border='0.5px solid #0f4a2e';
+}
+
+function initFormspree(){
+  var attempts=0;
+  var interval=setInterval(function(){
+    attempts++;
+    if(typeof formspree==='function'){
+      clearInterval(interval);
+      try{
+        formspree('initForm',{
+          formElement:'#booking-form',
+          formId:FORMSPREE_ID,
+          onSuccess:function(){screen='confirm';render();}
+        });
+      }catch(e){
+        var f=document.getElementById('booking-form');
+        if(f)f.addEventListener('submit',manualSubmit);
+      }
+    } else if(attempts>30){
+      clearInterval(interval);
+      var f=document.getElementById('booking-form');
+      if(f)f.addEventListener('submit',manualSubmit);
+    }
+  },200);
+}
+
+async function manualSubmit(e){
+  e.preventDefault();
+  var f=document.getElementById('booking-form');
+  var btn=f.querySelector('[data-fs-submit-btn]');
+  var errDiv=f.querySelector('[data-fs-error]');
+  var nm=f.querySelector('[name="name"]').value.trim();
+  var em=f.querySelector('[name="email"]').value.trim();
+  if(!nm||!em){
+    errDiv.style.display='block';
+    errDiv.textContent='Please fill in your name and email before submitting.';
+    return;
+  }
+  btn.disabled=true;btn.textContent='Sending...';
+  errDiv.style.display='none';
+  try{
+    var r=await fetch('https://formspree.io/f/'+FORMSPREE_ID,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        name:nm, email:em,
+        clinic:   f.querySelector('[name="clinic"]').value,
+        phone:    f.querySelector('[name="phone"]').value,
+        province: f.querySelector('[name="province"]').value,
+        preferred_time: document.getElementById('hidden-time').value||'Not specified',
+        message:  f.querySelector('[name="message"]').value,
+        profitability_score: score+'/100 — '+scoreLabel(score),
+        diagnostic_answers:  document.getElementById('hidden-diag').value,
+        _subject: 'New Booking Request — '+nm+' (Score: '+score+'/100)'
+      })
+    });
+    var d=await r.json();
+    if(d.ok){screen='confirm';render();}
+    else{
+      errDiv.style.display='block';
+      errDiv.textContent='Something went wrong. Please try again or email us directly.';
+      btn.disabled=false;btn.textContent='Confirm my free review \u2192';
+    }
+  }catch(err){
+    errDiv.style.display='block';
+    errDiv.textContent='Network error. Please check your connection and try again.';
+    btn.disabled=false;btn.textContent='Confirm my free review \u2192';
+  }
+}
+
+/* ── CONFIRM ── */
+function showConfirm(){
+  var steps=[
+    'We review your diagnostic results before the call',
+    'A specialist contacts you to confirm your meeting time',
+    '30 minutes: your finances, your questions, zero pressure'
+  ];
+  var stepHtml='';
+  for(var i=0;i<steps.length;i++){
+    stepHtml+='<div style="display:flex;gap:12px;align-items:flex-start;'+(i<2?'margin-bottom:12px;':'')+'">'
+      +'<div style="width:22px;height:22px;border-radius:50%;background:#0f4a2e;color:#fff;'
+      +'display:flex;align-items:center;justify-content:center;'
+      +'font-family:\'Helvetica Neue\',sans-serif;font-size:11px;flex-shrink:0;">'+(i+1)+'</div>'
+      +'<p class="sans" style="font-size:12.5px;color:#4a6e59;line-height:1.5;margin:3px 0 0;">'+steps[i]+'</p>'
+      +'</div>';
+  }
+  app.innerHTML=hdr()
+    +'<div class="card fade">'
+    +'<div style="text-align:center;padding:16px 0 8px;">'
+    +'<div style="width:64px;height:64px;border-radius:50%;background:#e8f0eb;'
+    +'display:flex;align-items:center;justify-content:center;margin:0 auto 18px;">'
+    +'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0f4a2e" '
+    +'stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">'
+    +'<polyline points="20 6 9 17 4 12"/></svg>'
+    +'</div>'
+    +'<h2 style="font-size:27px;color:#0f4a2e;font-weight:400;margin:0 0 10px;">You\'re all set!</h2>'
+    +'<p class="sans" style="font-size:14px;color:#6b7e72;line-height:1.65;max-width:420px;margin:0 auto 28px;">'
+    +'A Perspicacity Partners specialist will reach out within one business day to confirm your free 30-minute financial review.</p>'
+    +'<div style="background:#f7f5f0;border-radius:10px;padding:20px 26px;text-align:left;max-width:400px;margin:0 auto 28px;">'
+    +'<p class="sans" style="font-size:9.5px;color:#a07c30;letter-spacing:2.5px;text-transform:uppercase;margin:0 0 14px;">What happens next</p>'
+    +stepHtml+'</div>'
+    +'<p style="font-size:17px;color:#0f4a2e;margin:0 0 5px;font-style:italic;">perspicacitypartners.ca</p>'
+    +'<p class="sans" style="font-size:10px;color:#b0bcb5;margin:0;">Serving veterinary practices across Canada</p>'
+    +'</div></div>';
+}
+
+function go(s){
+  screen=s;
+  if(s==='diag'){curQ=0;answers=[null,null,null,null,null,null,null,null,null,null];ai=null;}
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
