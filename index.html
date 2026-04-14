@@ -238,6 +238,52 @@ function renderAI(){
 
 
 
+
+function getAI(){
+  var lbl=scoreLabel(score);
+  var revScore=0; for(var i=0;i<3;i++){if(answers[i]!==null)revScore+=QS[i].opts[answers[i]].s;}
+  var taxScore=0; for(var i=3;i<6;i++){if(answers[i]!==null)taxScore+=QS[i].opts[answers[i]].s;}
+  var cfScore=0;  for(var i=6;i<8;i++){if(answers[i]!==null)cfScore+=QS[i].opts[answers[i]].s;}
+
+  var headline,opp,risk,qw;
+
+  if(score<45)      headline='Significant financial gaps are costing your practice right now';
+  else if(score<60) headline='Your practice has untapped profit sitting on the table';
+  else if(score<75) headline='Good foundations — but key opportunities remain uncaptured';
+  else if(score<88) headline='Strong practice — a few optimizations could add real dollars';
+  else              headline='Well-run practice — focus on protecting and growing wealth';
+
+  if(taxScore<=revScore && taxScore<=cfScore){
+    opp='Your tax structure is your biggest opportunity. Most incorporated veterinary practices in Canada leave $10,000–$30,000 on the table annually through suboptimal corporate structure and unclaimed HST/GST input credits. A veterinary-specific tax review typically pays for itself many times over.';
+  } else if(revScore<=cfScore){
+    opp='Your revenue per visit has significant room to grow. Veterinary practices that conduct annual fee reviews and introduce wellness plans typically see 15–25% revenue increases without adding a single new client. Systematic pricing alone could meaningfully change your bottom line.';
+  } else {
+    opp='Your cash flow visibility is your most immediate opportunity. Practices with real-time financial dashboards make faster, more confident decisions and consistently outperform those running on gut feel or end-of-year statements.';
+  }
+
+  if(taxScore<15){
+    risk='Your tax exposure is the most urgent risk to address. Without veterinary-specific corporate structuring, you are likely overpaying CRA every year and may face unexpected bills at year-end. This compounds over time and becomes harder to unwind the longer it is left unaddressed.';
+  } else if(cfScore<12){
+    risk='Managing cash flow without a formal system leaves your practice vulnerable to payroll shortfalls, missed supplier payments, and poor equipment timing decisions. One bad month without visibility can create a spiral that takes quarters to recover from.';
+  } else if(revScore<18){
+    risk='Fees that are not regularly reviewed quietly erode your margins every year as costs rise. Many veterinary practices are effectively earning less in real terms than five years ago simply because pricing has not kept pace with inflation and market rates.';
+  } else {
+    risk='Without a written financial plan, growth decisions — hiring, expanding, acquiring equipment — are made reactively rather than strategically. This often results in taking on costs or debt at the wrong time, squeezing cash flow when the practice needs flexibility.';
+  }
+
+  if(answers[4]!==null && QS[4].opts[answers[4]].s<8){
+    qw='This week, ask your current accountant one question: how many veterinary practices do you work with? If the answer is fewer than five, it is worth having a second-opinion conversation with a veterinary accounting specialist — it costs nothing and could save you thousands.';
+  } else if(answers[6]!==null && QS[6].opts[answers[6]].s<8){
+    qw='Set up a free Wave or QuickBooks account this week and connect your practice bank account. Even basic categorization of the last 90 days of transactions will immediately show you where your largest controllable expenses are hiding.';
+  } else {
+    qw='Pull your last Notice of Assessment from CRA and compare your effective tax rate to the small business corporate rate of 9%. If the gap is significant, you are almost certainly overpaying — bring this number to your next meeting with us.';
+  }
+
+  ai={headline:headline,opportunity:opp,risk:risk,quickwin:qw};
+  var sec=document.getElementById('ai-sec');
+  if(sec)sec.innerHTML=renderAI();
+}
+
 /* ── BOOKING ── */
 function showBooking(){
   var provs=['Alberta','British Columbia','Manitoba','New Brunswick',
